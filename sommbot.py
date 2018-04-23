@@ -170,7 +170,6 @@ print(json.dumps(tweet,sort_keys=True,indent=4,separators=(',',': ')))
 
 if __name__ == "__main__":
 	while(True):
-		
 		# Target search term
 		target_term = "@Vino_Diezel"
 		
@@ -244,4 +243,4 @@ if __name__ == "__main__":
 						
 					# Reply with the score tweeter(replyNm, replyId, score, pairing=None, imgUrl=None)
 					tweeter(twitNm,twitId,wine_score,wine_pairing,wine_Media)
-		time.sleep(1)
+		time.sleep(300)
