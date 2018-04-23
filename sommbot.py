@@ -244,4 +244,4 @@ if __name__ == "__main__":
 						
 					# Reply with the score tweeter(replyNm, replyId, score, pairing=None, imgUrl=None)
 					tweeter(twitNm,twitId,wine_score,wine_pairing,wine_Media)
-	time.sleep(1)
+		time.sleep(1)
