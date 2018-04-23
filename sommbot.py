@@ -169,80 +169,79 @@ print(json.dumps(tweet,sort_keys=True,indent=4,separators=(',',': ')))
 """
 
 if __name__ == "__main__":
-	# Target search term
-	target_term = "@Vino_Diezel"
+	while(True):
+		
+		# Target search term
+		target_term = "@Vino_Diezel"
+		
+		#set api
+		api = tweeter_auth()
 	
-	#set api
-	api = tweeter_auth()
-
-	# Search for most recent tweet directed to the account
-	public_tweets = api.search(target_term, count=1, result_type="recent")
-
-	#Get tweet data
-	for tweet in public_tweets['statuses']:
-		#print(json.dumps(tweet,indent=4))
-		
-		#tweet:  ['Red', residual sugar, pH, alcohol] or Name of Wine?
-		twitNm = tweet['user']['screen_name']
-		twitId = tweet['user']['id']
-		wine_text = tweet['text']
-		wine = wine_text.lower().strip().replace('@vino_diezel ','')
-		wine_split = wine.split(',')
-		wine_list = [x.strip().lower() for x in wine_split]
-		
-		if wine_list[0] == 'red' or wine_list[0] =='white':
-		
-			#type of wine
-			wine_type = wine_list[0]
+		# Search for most recent tweet directed to the account
+		public_tweets = api.search(target_term, count=1, result_type="recent")
+	
+		#Get tweet data
+		for tweet in public_tweets['statuses']:
+			#print(json.dumps(tweet,indent=4))
 			
-			#inputs to wine models
-			wine_inputs = wine_list[1:]
+			#tweet:  ['Red', residual sugar, pH, alcohol] or Name of Wine?
+			twitNm = tweet['user']['screen_name']
+			twitId = tweet['user']['id']
+			wine_text = tweet['text']
+			wine = wine_text.lower().strip().replace('@vino_diezel ','')
+			wine_split = wine.split(',')
+			wine_list = [x.strip().lower() for x in wine_split]
 			
-			#Red/White wine 
-			if wine_type == 'red':
-				wine_score = red_wine_predict(wine_inputs)
-			elif wine_type=='white':
-				wine_score = white_wine_predict(wine_inputs)
-			else:
-				wine_score = 'Does not compute'
-			# Reply with the score tweeter(replyNm, replyId, score, pairing=None, imgUrl=None)
-			tweeter(replyNm=twitNm,replyId=twitId,score=wine_score)
-		else:
-			url = "http://lcboapi.com/products?"
-			params = {"q":wine}
-			print(params)
+			if wine_list[0] == 'red' or wine_list[0] =='white':
 			
-			# Perform the API call to get the wine data
-			lookup_response = req.get(url, params=params).json()
-			
-			if lookup_response['pager']['total_record_count'] == 0:
-			
-				#No wine found in API
-				api.update_status("@" + twitNm + " Unable to find your wine.  Sorry pal  :( " \
-					 ,in_reply_to_id = twitId)
-					 
-			else:
-				#Wine found
-				wine_type = lookup_response['result'][0]['secondary_category']
-				wine_RS = lookup_response['result'][0]['sugar_in_grams_per_liter']
-				wine_ABV = lookup_response['result'][0]['alcohol_content']
-				wine_Media = lookup_response['result'][0]['image_thumb_url']
-				wine_pairing = lookup_response['result'][0]['serving_suggestion']
-
-				#White/Red wine prediction
-				if wine_type.lower() == 'red wine':
-					wine_inputs = [[wine_RS, 3,wine_ABV/100]]
+				#type of wine
+				wine_type = wine_list[0]
+				
+				#inputs to wine models
+				wine_inputs = wine_list[1:]
+				
+				#Red/White wine 
+				if wine_type == 'red':
 					wine_score = red_wine_predict(wine_inputs)
-					print(wine_score)
-				elif wine_type.lower() == 'white wine':
-					wine_inputs = [[wine_RS,2,wine_ABV/100]]
+				elif wine_type=='white':
 					wine_score = white_wine_predict(wine_inputs)
 				else:
-					wine_score = 'Does not compute.'
-					
+					wine_score = 'Does not compute'
 				# Reply with the score tweeter(replyNm, replyId, score, pairing=None, imgUrl=None)
-				tweeter(twitNm,twitId,wine_score,wine_pairing,wine_Media)
-# Set timer to run every second
-while(True):
-	tweeter(replyNm, replyId, score [, pairing [, imgUrl ]])
+				tweeter(replyNm=twitNm,replyId=twitId,score=wine_score)
+			else:
+				url = "http://lcboapi.com/products?"
+				params = {"q":wine}
+				print(params)
+				
+				# Perform the API call to get the wine data
+				lookup_response = req.get(url, params=params).json()
+				
+				if lookup_response['pager']['total_record_count'] == 0:
+				
+					#No wine found in API
+					api.update_status("@" + twitNm + " Unable to find your wine.  Sorry pal  :( " \
+						 ,in_reply_to_id = twitId)
+						 
+				else:
+					#Wine found
+					wine_type = lookup_response['result'][0]['secondary_category']
+					wine_RS = lookup_response['result'][0]['sugar_in_grams_per_liter']
+					wine_ABV = lookup_response['result'][0]['alcohol_content']
+					wine_Media = lookup_response['result'][0]['image_thumb_url']
+					wine_pairing = lookup_response['result'][0]['serving_suggestion']
+	
+					#White/Red wine prediction
+					if wine_type.lower() == 'red wine':
+						wine_inputs = [[wine_RS, 3,wine_ABV/100]]
+						wine_score = red_wine_predict(wine_inputs)
+						print(wine_score)
+					elif wine_type.lower() == 'white wine':
+						wine_inputs = [[wine_RS,2,wine_ABV/100]]
+						wine_score = white_wine_predict(wine_inputs)
+					else:
+						wine_score = 'Does not compute.'
+						
+					# Reply with the score tweeter(replyNm, replyId, score, pairing=None, imgUrl=None)
+					tweeter(twitNm,twitId,wine_score,wine_pairing,wine_Media)
 	time.sleep(1)
