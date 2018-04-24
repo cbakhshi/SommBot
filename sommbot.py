@@ -139,7 +139,7 @@ def tweeter(replyNm, replyId, score, pairing='', imgUrl=''):
 	api = tweeter_auth()
 	if imgUrl=='':
 		api.update_status("@" + replyNm + " The score for your wine is: " + str(score) \
-			,in_reply_to_id = replyId)
+					,in_reply_to_status_id = replyId)
 	else:
 		file = os.getcwd()+'/temp.png'
 		response = req.get(imgUrl, stream=True)
@@ -148,11 +148,11 @@ def tweeter(replyNm, replyId, score, pairing='', imgUrl=''):
 				for chunk in response:
 					image.write(chunk)
 			image.close()
-			api.update_with_media(file,status = "@" + replyNm + " Your wine is score: " \
-				+ str(score) + ". " + str(pairing) \
-				, in_reply_to_id = replyId)
-			print("@" + replyNm + " Your wine is: "+ str(score) + ". " + str(pairing))
-			os.remove(file)
+			api.update_with_media(file,status = "@" + replyNm + " Your wine score is: " \
+				+ str(score) + ". " + str(pairing) 
+				, in_reply_to_status_id = replyId)
+		print("@" + replyNm + " Your wine score is: "+ str(score) + ". " + str(pairing))
+		os.remove(file)
 		
 
 """
@@ -181,11 +181,10 @@ if __name__ == "__main__":
 	
 		#Get tweet data
 		for tweet in public_tweets['statuses']:
-			#print(json.dumps(tweet,indent=4))
-			
 			#tweet:  ['Red', residual sugar, pH, alcohol] or Name of Wine?
 			twitNm = tweet['user']['screen_name']
 			twitId = tweet['user']['id']
+			tweet_id = tweet['id']
 			wine_text = tweet['text']
 			wine = wine_text.lower().strip().replace('@vino_diezel ','')
 			wine_split = wine.split(',')
@@ -206,8 +205,11 @@ if __name__ == "__main__":
 					wine_score = white_wine_predict(wine_inputs)
 				else:
 					wine_score = 'Does not compute'
-				# Reply with the score tweeter(replyNm, replyId, score, pairing=None, imgUrl=None)
-				tweeter(replyNm=twitNm,replyId=twitId,score=wine_score)
+				try:
+					# Reply with the score tweeter(replyNm, replyId, score, pairing=None, imgUrl=None)
+					tweeter(replyNm=twitNm,replyId=tweet_id,score=wine_score)
+				except tweepy.error.TweepError:
+					print("Already responded to " + str(tweet_id))
 			else:
 				url = "http://lcboapi.com/products?"
 				params = {"q":wine}
@@ -218,9 +220,11 @@ if __name__ == "__main__":
 				
 				if lookup_response['pager']['total_record_count'] == 0:
 				
-					#No wine found in API
-					api.update_status("@" + twitNm + " Unable to find your wine.  Sorry pal  :( " \
-						 ,in_reply_to_id = twitId)
+					try:
+						#No wine found in API
+						api.update_status("@" + twitNm + " Unable to find your wine.  Sorry pal  :( ", in_reply_to_status_id = tweet_id)
+					except tweepy.error.TweepError:
+						print("Already responded to " + str(tweet_id))
 						 
 				else:
 					#Wine found
@@ -232,7 +236,7 @@ if __name__ == "__main__":
 	
 					#White/Red wine prediction
 					if wine_type.lower() == 'red wine':
-						wine_inputs = [[wine_RS, 3,wine_ABV/100]]
+						wine_inputs = [[wine_RS,3,wine_ABV/100]]
 						wine_score = red_wine_predict(wine_inputs)
 						print(wine_score)
 					elif wine_type.lower() == 'white wine':
@@ -240,7 +244,10 @@ if __name__ == "__main__":
 						wine_score = white_wine_predict(wine_inputs)
 					else:
 						wine_score = 'Does not compute.'
-						
-					# Reply with the score tweeter(replyNm, replyId, score, pairing=None, imgUrl=None)
-					tweeter(twitNm,twitId,wine_score,wine_pairing,wine_Media)
-		time.sleep(300)
+					
+					try:	
+						# Reply with the score tweeter(replyNm, replyId, score, pairing=None, imgUrl=None)
+						tweeter(twitNm,tweet_id,wine_score,wine_pairing,wine_Media)
+					except tweepy.error.TweepError:
+						print("Already responded to " + str(tweet_id))
+		time.sleep(2)
