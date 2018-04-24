@@ -1,9 +1,10 @@
 # Import Dependencies
 
-import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 from sklearn.neighbors import KNeighborsClassifier
-#%matplotlib inline
+#%matplotlib inlinet
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
