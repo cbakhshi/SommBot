@@ -16,6 +16,7 @@ import json
 import random
 import datetime
 
+responded_to_tweets = set()
 
 def red_wine_predict(new_red_wine_data):
 	# Import Data
@@ -149,11 +150,14 @@ def tweeter(replyNm, replyId, score, pairing='', imgUrl=''):
 				for chunk in response:
 					image.write(chunk)
 			image.close()
-			api.update_with_media(file,status = "@" + replyNm + " Your wine score is: " \
-				+ str(score) + ". " + str(pairing) 
-				, in_reply_to_status_id = replyId)
+			if replyId not in responded_to_tweets:
+				api.update_with_media(file,status = "@" + replyNm + " Your wine score is: " \
+					+ str(score) + ". " + str(pairing) 
+					, in_reply_to_status_id = replyId)
 		print("@" + replyNm + " Your wine score is: "+ str(score) + ". " + str(pairing))
 		os.remove(file)
+	
+	responded_to_tweets.add(replyId)
 		
 
 """
