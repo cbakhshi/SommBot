@@ -56,7 +56,7 @@ def red_wine_predict(new_red_wine_data):
 		test_score = knn.score(X_test_scaled, y_test)
 		train_scores.append(train_score)
 		test_scores.append(test_score)
-		print(f"k: {k}, Train/Test Score: {train_score:.3f}/{test_score:.3f}")
+		#print(f"k: {k}, Train/Test Score: {train_score:.3f}/{test_score:.3f}")
 		
 		
 	plt.plot(range(1, 30, 1), train_scores, marker='o')
@@ -68,10 +68,11 @@ def red_wine_predict(new_red_wine_data):
 	# Note that k: 13 provides the best accuracy where the classifier starts to stablize
 	knn = KNeighborsClassifier(n_neighbors=13)
 	knn.fit(X_train, y_train)
-	print('k=13 Test Acc: %.3f' % knn.score(X_test, y_test))
+	#print('k=13 Test Acc: %.3f' % knn.score(X_test, y_test))
 
 	#new_red_wine_data = [[2.64,3.65,13.9]]
 	predicted_class = knn.predict(new_red_wine_data)
+	#print(predicted_class)
 	return predicted_class
 
 def white_wine_predict(new_white_wine_data):
